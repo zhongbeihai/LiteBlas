@@ -1,0 +1,30 @@
+runtime configuration summary:
+	size: 256
+	reps: 100
+	verb: 0
+	noverif: 0
+	seed: 1
+	kernel: blislab
+	debug: 0
+
+start correctness test...
+pass correctness test...
+
+start performance test...
+
+blislab          256 3.3093
+runtime configuration summary:
+	size: 256
+	reps: 100
+	verb: 0
+	noverif: 0
+	seed: 1
+	kernel: blislab
+	debug: 0
+
+start correctness test...
+pass correctness test...
+
+start performance test...
+
+blislab          256 3.8011
