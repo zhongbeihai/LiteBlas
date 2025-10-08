@@ -1,5 +1,5 @@
 runtime configuration summary:
-	size: 256
+	size: 512
 	reps: 100
 	verb: 0
 	noverif: 0
@@ -12,9 +12,9 @@ pass correctness test...
 
 start performance test...
 
-blislab          256 3.3093
+blislab          512 3.4345
 runtime configuration summary:
-	size: 256
+	size: 1024
 	reps: 100
 	verb: 0
 	noverif: 0
@@ -27,4 +27,4 @@ pass correctness test...
 
 start performance test...
 
-blislab          256 3.8011
+blislab         1024 3.4786
