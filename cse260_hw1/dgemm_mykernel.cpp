@@ -30,14 +30,12 @@ void DGEMM_mykernel::my_dgemm(
         )
 {
     int    ic, ib, jc, jb, pc, pb;
-    const double *packA, *packB;
+    double *packA, *packB;
 
     // Using NOPACK option for simplicity
     // #define NOPACK
-    double* A_pack_buf = nullptr;
-    posix_memalign((void**)&A_pack_buf, 64, sizeof(double) * (( (param_mc + param_mr - 1)/param_mr ) * param_mr) * param_kc);
-    double* B_pack_buf = nullptr;
-    posix_memalign((void**)&B_pack_buf, 64, sizeof(double) * param_kc * ( ( (param_nc + param_nr - 1)/param_nr ) * param_nr ));
+    posix_memalign((void**)&packA, 64, sizeof(double) * (( (param_mc + param_mr - 1)/param_mr ) * param_mr) * param_kc);
+    posix_memalign((void**)&packB, 64, sizeof(double) * param_kc * ( ( (param_nc + param_nr - 1)/param_nr ) * param_nr ));
 
     for ( ic = 0; ic < m; ic += param_mc ) {              // 5-th loop around micro-kernel
         ib = min( m - ic, param_mc );
@@ -47,7 +45,7 @@ void DGEMM_mykernel::my_dgemm(
             #ifdef NOPACK
             packA = &XA[pc + ic * lda ];
             #else
-            pack_A_panel_MrKc(A_pack_buf, XA, lda, ib, pb, ic, pc, param_mr);
+            pack_A_panel_MrKc(packA, XA, lda, ib, pb, ic, pc, param_mr);
             #endif
 
             for ( jc = 0; jc < n; jc += param_nc ) {        // 3-rd loop around micro-kernel
@@ -56,7 +54,7 @@ void DGEMM_mykernel::my_dgemm(
                 #ifdef NOPACK
                 packB = &XB[ldb * pc + jc ];
                 #else
-                pack_B_panel_KcNr(B_pack_buf, XB, ldb, pb, jb, pc, jc, param_nr);
+                pack_B_panel_KcNr(packB, XB, ldb, pb, jb, pc, jc, param_nr);
                 #endif
 
                 // Implement your macro-kernel here
