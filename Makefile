@@ -1,5 +1,5 @@
 # Compiler and flags
-MY_OPT := 
+MY_OPT := -mavx2 -mfma
 CXX := g++
 CXXFLAGS := -Wall -Wextra -std=c++17  -ggdb -O3 $(MY_OPT)
 
