@@ -21,9 +21,9 @@ void DGEMM_mykernel::my_dgemm(
         int    m,
         int    n,
         int    k,
-        const double *XA,
+        const double* __restrict__ XA,
         int    lda,
-        const double *XB,
+        const double* __restrict__ XB,
         int    ldb,
         double *C,       
         int    ldc       
@@ -85,8 +85,8 @@ void DGEMM_mykernel::my_dgemm(
 void DGEMM_mykernel::my_dgemm_ukr( int    kc,
                                   int    mr,
                                   int    nr,
-                                  const double *a,
-                                  const double *b,
+                                  const double* __restrict__ a,
+                                  const double* __restrict__ b,
                                   double *c,
                                   int ldc)
 {
@@ -127,8 +127,8 @@ void DGEMM_mykernel::my_macro_kernel(
         int    ib,
         int    jb,
         int    pb,
-        const double * packA,
-        const double * packB,
+        const double* __restrict__ packA,
+        const double* __restrict__ packB,
         double * C,
         int    ldc
         )
