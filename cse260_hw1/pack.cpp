@@ -55,6 +55,7 @@ void pack_A_panel_MrKc(double *__restrict__ A_pack,
                 A_pack[i] = a_col[i * lda];
             for (; i < Mr; i++)
                 A_pack[i] = 0.0;
+            A_pack += Mr;
         }
     }
 }
@@ -70,7 +71,7 @@ void pack_B_panel_KcNr(double *__restrict__ B_pack,
                        int Nr)  // micro-tile cols
 {
     int jr = 0;
-    for(; jr <= jb; jc += Nr){
+    for(; jr + Nr <= jb; jr += Nr){
         for(int k = 0; k < pb; k++){
             const double* b_row = B + (pc + k) * ldb + (jc + jr);
             memcpy(B_pack, b_row, sizeof(double) * Nr);

@@ -12,19 +12,4 @@ pass correctness test...
 
 start performance test...
 
-openblas         512 9.3135
-runtime configuration summary:
-	size: 1024
-	reps: 100
-	verb: 0
-	noverif: 0
-	seed: 1
-	kernel: openblas
-	debug: 0
-
-start correctness test...
-pass correctness test...
-
-start performance test...
-
-openblas        1024 9.6630
+openblas         512 18.4177

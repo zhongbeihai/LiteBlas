@@ -4,12 +4,7 @@ runtime configuration summary:
 	verb: 0
 	noverif: 0
 	seed: 1
-	kernel: blislab
+	kernel: my_kernel
 	debug: 0
 
 start correctness test...
-pass correctness test...
-
-start performance test...
-
-blislab          512 6.8533

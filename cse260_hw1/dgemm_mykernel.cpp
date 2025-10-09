@@ -30,7 +30,7 @@ void DGEMM_mykernel::my_dgemm(
         )
 {
     int    ic, ib, jc, jb, pc, pb;
-    double *packA, *packB;
+    double *packA = nullptr, *packB = nullptr;
 
     // Using NOPACK option for simplicity
     // #define NOPACK
@@ -70,6 +70,8 @@ void DGEMM_mykernel::my_dgemm(
             }                                               // End 3.rd loop around micro-kernel
         }                                                 // End 4.th loop around micro-kernel
     }                                                     // End 5.th loop around micro-kernel
+    free(packA);
+    free(packB);
 }
 
 #define a(i, j, ld) a[ (i)*(ld) + (j) ]
