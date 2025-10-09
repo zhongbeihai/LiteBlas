@@ -1,7 +1,9 @@
 #include "dgemm_mykernel.h"
 #include "parameters.h"
+#include "pack.h"
 
 #include <stdexcept>
+#include <cstdlib> // for posix_memalign
 
 void DGEMM_mykernel::compute(const Mat& A, const Mat& B, Mat& C) {
     int m = A.rows();
@@ -31,7 +33,11 @@ void DGEMM_mykernel::my_dgemm(
     const double *packA, *packB;
 
     // Using NOPACK option for simplicity
-    #define NOPACK
+    // #define NOPACK
+    double* A_pack_buf = nullptr;
+    posix_memalign((void**)&A_pack_buf, 64, sizeof(double) * (( (param_mc + param_mr - 1)/param_mr ) * param_mr) * param_kc);
+    double* B_pack_buf = nullptr;
+    posix_memalign((void**)&B_pack_buf, 64, sizeof(double) * param_kc * ( ( (param_nc + param_nr - 1)/param_nr ) * param_nr ));
 
     for ( ic = 0; ic < m; ic += param_mc ) {              // 5-th loop around micro-kernel
         ib = min( m - ic, param_mc );
@@ -41,7 +47,7 @@ void DGEMM_mykernel::my_dgemm(
             #ifdef NOPACK
             packA = &XA[pc + ic * lda ];
             #else
-            // Implement pack_A if you want to use PACK option
+            pack_A_panel_MrKc(A_pack_buf, XA, lda, ib, pb, ic, pc, param_mr);
             #endif
 
             for ( jc = 0; jc < n; jc += param_nc ) {        // 3-rd loop around micro-kernel
@@ -50,7 +56,7 @@ void DGEMM_mykernel::my_dgemm(
                 #ifdef NOPACK
                 packB = &XB[ldb * pc + jc ];
                 #else
-                // Implement pack_B if you want to use PACK option
+                pack_B_panel_KcNr(B_pack_buf, XB, ldb, pb, jb, pc, jc, param_nr);
                 #endif
 
                 // Implement your macro-kernel here
