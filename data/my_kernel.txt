@@ -1,0 +1,10 @@
+runtime configuration summary:
+	size: 512
+	reps: 100
+	verb: 0
+	noverif: 0
+	seed: 1
+	kernel: my_kernel
+	debug: 0
+
+start correctness test...

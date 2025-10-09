@@ -30,7 +30,7 @@ void DGEMM_mykernel::my_dgemm(
         )
 {
     int    ic, ib, jc, jb, pc, pb;
-    double *packA, *packB;
+    double *packA = nullptr, *packB = nullptr;
 
     // Using NOPACK option for simplicity
     // #define NOPACK
@@ -70,6 +70,8 @@ void DGEMM_mykernel::my_dgemm(
             }                                               // End 3.rd loop around micro-kernel
         }                                                 // End 4.th loop around micro-kernel
     }                                                     // End 5.th loop around micro-kernel
+    free(packA);
+    free(packB);
 }
 
 #define a(i, j, ld) a[ (i)*(ld) + (j) ]
@@ -99,19 +101,23 @@ void DGEMM_mykernel::my_dgemm_ukr( int    kc,
     }
     
     // Perform matrix multiplication
+    const double* ap = a;
+    const double* bp = b;
     for ( l = 0; l < kc; ++l ) {                 
         for ( i = 0; i < mr; ++i ) { 
-            double as = a(i, l, ldc);
+            double as = ap[i];
             for ( j = 0; j < nr; ++j ) { 
-                cloc[i][j] +=  as * b(l, j, ldc);
+                cloc[i][j] +=  as * bp[j];
             }
         }
+        ap += param_mr;
+        bp += param_nr;
     }
     
     // Store local array back to C
     for (i = 0; i < mr; ++i) {
         for (j = 0; j < nr; ++j) {
-            c(i, j, ldc) = cloc[i][j];
+            c[i * ldc + j] = cloc[i][j];
         }
     }
 }
@@ -130,14 +136,20 @@ void DGEMM_mykernel::my_macro_kernel(
     int    i, j;
 
     for ( i = 0; i < ib; i += param_mr ) {                      // 2-th loop around micro-kernel
+        int mr_eff = min(param_mr, ib - i);
+        const double* a_sub = packA + ((i / param_mr) * (param_mr * pb));
+
         for ( j = 0; j < jb; j += param_nr ) {                  // 1-th loop around micro-kernel
+        int nr_eff = min(param_nr, jb - j);
+        const double* b_sub = packB + ((j / param_nr) * (param_nr * pb));
+        double* c_sub = &C[i * ldc + j];
             my_dgemm_ukr (
                         pb,
-                        min(ib-i, param_mr),
-                        min(jb-j, param_nr),
-                        &packA[i * ldc],          // assumes sq matrix, otherwise use lda
-                        &packB[j],                
-                        &C[ i * ldc + j ],
+                        mr_eff,
+                        nr_eff,
+                        a_sub,          // assumes sq matrix, otherwise use lda
+                        b_sub,
+                        c_sub,                
                         ldc
                         );
         }                                                       // 1-th loop around micro-kernel

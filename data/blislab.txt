@@ -1,5 +1,6 @@
 runtime configuration summary:
 	size: 512
+	size: 512
 	reps: 100
 	verb: 0
 	noverif: 0
