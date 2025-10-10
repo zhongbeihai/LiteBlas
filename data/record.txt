@@ -1,0 +1,8 @@
+# baseline
+6
+
+# implement pack
+7.5
+
+# change ic->pc-jc to jc->pc->ic || simulate register in micro-my_kernel
+17
