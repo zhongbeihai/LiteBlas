@@ -18,6 +18,7 @@ string DGEMM_mykernel::name() {
     return "my_kernel";
 }
 
+
 void DGEMM_mykernel::my_dgemm(
         int    m,
         int    n,
@@ -86,7 +87,7 @@ void DGEMM_mykernel::my_macro_kernel(
             int nr_eff = min(param_nr, jb - j);
             const double* b_sub = packB + ((j / param_nr) * (param_nr * pb));
             double* c_sub = &C[i * ldc + j];
-                my_dgemm_simulate_registers (
+            my_dgemm_simulate_registers (
                             pb,
                             mr_eff,
                             nr_eff,
