@@ -22,8 +22,3 @@ void my_dgemm_sve_8x4(int kc,
                      int nc, // shoule be 4
                       const double* __restrict__ A, const double* __restrict__ B,
                       double *C, int ldc);
-
-void my_dgemm_sve_8x4(int kc, int mc, int nc,
-                      const double*  A,
-                      const double*  B,
-                      double *C, int ldc);

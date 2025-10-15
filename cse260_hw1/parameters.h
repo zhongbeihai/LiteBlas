@@ -3,11 +3,11 @@
 
 // Allow override from compiler flags
 #ifndef PARAM_MC
-#define PARAM_MC 256
+#define PARAM_MC 512
 #endif
 
 #ifndef PARAM_NC
-#define PARAM_NC 256
+#define PARAM_NC 512
 #endif
 
 #ifndef PARAM_KC
