@@ -37,15 +37,15 @@ void DGEMM_mykernel::my_dgemm(
     posix_memalign((void**)&packA, 64, sizeof(double) * (( (param_mc + param_mr - 1)/param_mr ) * param_mr) * param_kc);
     posix_memalign((void**)&packB, 64, sizeof(double) * param_kc * ( ( (param_nc + param_nr - 1)/param_nr ) * param_nr ));
 
-    for ( jc = 0; jc < m; jc += param_nc ) {              // 5-th loop around micro-kernel
-        jb = min( m - jc, param_nc );
+    for ( jc = 0; jc < n; jc += param_nc ) {              // 5-th loop around micro-kernel
+        jb = min(n - jc, param_nc );
         for ( pc = 0; pc < k; pc += param_kc ) {          // 4-th loop around micro-kernel
             pb = min( k - pc, param_kc );
             
             pack_B_panel_KcNr(packB, XB, ldb, pb, jb, pc, jc, param_nr);
 
-            for ( ic = 0; ic < n; ic += param_mc ) {        // 3-rd loop around micro-kernel
-                ib = min( n - ic, param_mc );
+            for ( ic = 0; ic < m; ic += param_mc ) {        // 3-rd loop around micro-kernel
+                ib = min(m - ic, param_mc );
 
                 pack_A_panel_MrKc(packA, XA, lda, ib, pb, ic, pc, param_mr);
 
@@ -87,7 +87,7 @@ void DGEMM_mykernel::my_macro_kernel(
             int nr_eff = min(param_nr, jb - j);
             const double* b_sub = packB + ((j / param_nr) * (param_nr * pb));
             double* c_sub = &C[i * ldc + j];
-            my_dgemm_simulate_registers (
+            my_dgemm_sve_8x4 (
                             pb,
                             mr_eff,
                             nr_eff,
