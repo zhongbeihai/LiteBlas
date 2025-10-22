@@ -6,14 +6,9 @@
 #define ALIGN64 64
 #endif
 
-static inline void* aligned_malloc64(size_t bytes) {
+void* aligned_malloc(size_t bytes) {
     void* p = NULL;
-#if defined(_MSC_VER)
-    p = _aligned_malloc(bytes, ALIGN64);
-    if (!p) abort();
-#else
     if (posix_memalign(&p, ALIGN64, bytes) != 0) abort();
-#endif
     return p;
 }
 

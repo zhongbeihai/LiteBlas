@@ -2,6 +2,8 @@
 #pragma once
 #include <cstddef>
 
+void* aligned_malloc(size_t bytes);
+
 void pack_A_panel_MrKc(double *__restrict__ A_pack,
                        const double *__restrict__ A, int lda,
                        int ib, int pb,

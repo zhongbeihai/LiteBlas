@@ -34,8 +34,11 @@ void DGEMM_mykernel::my_dgemm(
     int    ic, ib, jc, jb, pc, pb;
     double *packA = nullptr, *packB = nullptr;
 
-    posix_memalign((void**)&packA, 64, sizeof(double) * (( (param_mc + param_mr - 1)/param_mr ) * param_mr) * param_kc);
-    posix_memalign((void**)&packB, 64, sizeof(double) * param_kc * ( ( (param_nc + param_nr - 1)/param_nr ) * param_nr ));
+    // packA -> round_up(mc,mr) * kc * sizeof(double)
+    packA = (double*) aligned_malloc(sizeof(double) * (( (param_mc + param_mr - 1)/param_mr ) * param_mr) * param_kc);
+    // packB -> kc * round_up(nc,nr) * sizeof(double)
+    packB = (double*) aligned_malloc(sizeof(double) * param_kc * ( ( (param_nc + param_nr - 1)/param_nr ) * param_nr));
+    
 
     for ( jc = 0; jc < n; jc += param_nc ) {              // 5-th loop around micro-kernel
         jb = min(n - jc, param_nc );
