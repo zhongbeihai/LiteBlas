@@ -3,6 +3,8 @@
 #define c(i, j, ld) c[ (i)*(ld) + (j) ]
 #include "parameters.h"
 #include <arm_sve.h>
+#include <assert.h>
+#include <stdint.h>
 
 void my_dgemm_ukr( int    kc,
                                   int    mr, 
@@ -104,109 +106,42 @@ void my_dgemm_sve_8x4(int kc,
                       const double* __restrict__ A, const double* __restrict__ B,
                       double *C, int ldc)
 {
-    const uint64_t vector_len = svcntd();
-    const bool has_second_chunk = static_cast<uint64_t>(nr_eff) > vector_len;
+    assert(svcntd() == 4);
+    const svbool_t pg = svptrue_b64();
 
-    svbool_t pg_col0 = svwhilelt_b64(static_cast<uint64_t>(0), static_cast<uint64_t>(nr_eff));
-    svbool_t pg_col1 = has_second_chunk
-                           ? svwhilelt_b64(vector_len, static_cast<uint64_t>(nr_eff))
-                           : svpfalse_b();
-
-    svfloat64_t c0_0 = svdup_f64(0.0), c0_1 = svdup_f64(0.0);
-    svfloat64_t c1_0 = svdup_f64(0.0), c1_1 = svdup_f64(0.0);
-    svfloat64_t c2_0 = svdup_f64(0.0), c2_1 = svdup_f64(0.0);
-    svfloat64_t c3_0 = svdup_f64(0.0), c3_1 = svdup_f64(0.0);
-
-    if (mr_eff > 0) {
-        c0_0 = svld1(pg_col0, C + 0 * ldc);
-        if (has_second_chunk) {
-            c0_1 = svld1(pg_col1, C + 0 * ldc + vector_len);
-        }
-    }
-    if (mr_eff > 1) {
-        c1_0 = svld1(pg_col0, C + 1 * ldc);
-        if (has_second_chunk) {
-            c1_1 = svld1(pg_col1, C + 1 * ldc + vector_len);
-        }
-    }
-    if (mr_eff > 2) {
-        c2_0 = svld1(pg_col0, C + 2 * ldc);
-        if (has_second_chunk) {
-            c2_1 = svld1(pg_col1, C + 2 * ldc + vector_len);
-        }
-    }
-    if (mr_eff > 3) {
-        c3_0 = svld1(pg_col0, C + 3 * ldc);
-        if (has_second_chunk) {
-            c3_1 = svld1(pg_col1, C + 3 * ldc + vector_len);
-        }
-    }
+    svfloat64_t c0 = svld1(pg, C + 0*ldc);
+    svfloat64_t c1 = svld1(pg, C + 1*ldc);
+    svfloat64_t c2 = svld1(pg, C + 2*ldc);
+    svfloat64_t c3 = svld1(pg, C + 3*ldc);
+    svfloat64_t c4 = svld1(pg, C + 4*ldc);
+    svfloat64_t c5 = svld1(pg, C + 5*ldc);
+    svfloat64_t c6 = svld1(pg, C + 6*ldc);
+    svfloat64_t c7 = svld1(pg, C + 7*ldc);
 
     const double* ap = A;
     const double* bp = B;
-
     for (int l = 0; l < kc; ++l) {
-        svfloat64_t b0 = svld1(pg_col0, bp);
-        svfloat64_t b1 = svdup_f64(0.0);
-        if (has_second_chunk) {
-            b1 = svld1(pg_col1, bp + vector_len);
-        }
+        svfloat64_t b = svld1(pg, bp); 
 
-        if (mr_eff > 0) {
-            svfloat64_t a0_bcast = svdup_f64(ap[0]);
-            c0_0 = svmla_f64_m(pg_col0, c0_0, a0_bcast, b0);
-            if (has_second_chunk) {
-                c0_1 = svmla_f64_m(pg_col1, c0_1, a0_bcast, b1);
-            }
-        }
-        if (mr_eff > 1) {
-            svfloat64_t a1_bcast = svdup_f64(ap[1]);
-            c1_0 = svmla_f64_m(pg_col0, c1_0, a1_bcast, b0);
-            if (has_second_chunk) {
-                c1_1 = svmla_f64_m(pg_col1, c1_1, a1_bcast, b1);
-            }
-        }
-        if (mr_eff > 2) {
-            svfloat64_t a2_bcast = svdup_f64(ap[2]);
-            c2_0 = svmla_f64_m(pg_col0, c2_0, a2_bcast, b0);
-            if (has_second_chunk) {
-                c2_1 = svmla_f64_m(pg_col1, c2_1, a2_bcast, b1);
-            }
-        }
-        if (mr_eff > 3) {
-            svfloat64_t a3_bcast = svdup_f64(ap[3]);
-            c3_0 = svmla_f64_m(pg_col0, c3_0, a3_bcast, b0);
-            if (has_second_chunk) {
-                c3_1 = svmla_f64_m(pg_col1, c3_1, a3_bcast, b1);
-            }
-        }
+        svfloat64_t a0 = svdup_f64(ap[0]); c0 = svmla_f64_x(pg, c0, a0, b);
+        svfloat64_t a1 = svdup_f64(ap[1]); c1 = svmla_f64_x(pg, c1, a1, b);
+        svfloat64_t a2 = svdup_f64(ap[2]); c2 = svmla_f64_x(pg, c2, a2, b);
+        svfloat64_t a3 = svdup_f64(ap[3]); c3 = svmla_f64_x(pg, c3, a3, b);
+        svfloat64_t a4 = svdup_f64(ap[4]); c4 = svmla_f64_x(pg, c4, a4, b);
+        svfloat64_t a5 = svdup_f64(ap[5]); c5 = svmla_f64_x(pg, c5, a5, b);
+        svfloat64_t a6 = svdup_f64(ap[6]); c6 = svmla_f64_x(pg, c6, a6, b);
+        svfloat64_t a7 = svdup_f64(ap[7]); c7 = svmla_f64_x(pg, c7, a7, b);
 
-        ap += param_mr;
-        bp += param_nr;
+        ap += 8;  // param_mr
+        bp += 4;  // param_nr
     }
 
-    if (mr_eff > 0) {
-        svst1(pg_col0, C + 0 * ldc, c0_0);
-        if (has_second_chunk) {
-            svst1(pg_col1, C + 0 * ldc + vector_len, c0_1);
-        }
-    }
-    if (mr_eff > 1) {
-        svst1(pg_col0, C + 1 * ldc, c1_0);
-        if (has_second_chunk) {
-            svst1(pg_col1, C + 1 * ldc + vector_len, c1_1);
-        }
-    }
-    if (mr_eff > 2) {
-        svst1(pg_col0, C + 2 * ldc, c2_0);
-        if (has_second_chunk) {
-            svst1(pg_col1, C + 2 * ldc + vector_len, c2_1);
-        }
-    }
-    if (mr_eff > 3) {
-        svst1(pg_col0, C + 3 * ldc, c3_0);
-        if (has_second_chunk) {
-            svst1(pg_col1, C + 3 * ldc + vector_len, c3_1);
-        }
-    }
+    svst1(pg, C + 0*ldc, c0);
+    svst1(pg, C + 1*ldc, c1);
+    svst1(pg, C + 2*ldc, c2);
+    svst1(pg, C + 3*ldc, c3);
+    svst1(pg, C + 4*ldc, c4);
+    svst1(pg, C + 5*ldc, c5);
+    svst1(pg, C + 6*ldc, c6);
+    svst1(pg, C + 7*ldc, c7);
 }
