@@ -1,4 +1,4 @@
-# CSE260 HW1: Optimized DGEMM Kernel
+# CSE260: Optimized DGEMM Kernel
 
 This project implements a blocked `dgemm` for ARMv8.2-A + SVE platforms. It follows the classic *pack–macro kernel–micro kernel* structure: panels of `A` and `B` are packed into contiguous buffers, a five-level blocking loop orchestrates cache reuse, and an 8×4 SVE microkernel performs the innermost compute.
 
